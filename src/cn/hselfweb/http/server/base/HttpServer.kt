@@ -1,39 +1,37 @@
 package cn.hselfweb.http.server.base
 
-import com.sun.net.httpserver.HttpExchange
-import com.sun.net.httpserver.HttpHandler
 import com.sun.net.httpserver.HttpServer
+import java.net.InetSocketAddress
 
 class HttpServer() {
     lateinit var httpExchangeDispacher: HttpExchangeDispacher
-    lateinit var httpSampleServer: HttpServer
+    lateinit var httpSimpleServer: HttpServer
     lateinit var httpRespone: HttpResponse
     lateinit var httpResquest: HttpRequest
 
     //对之后的客户端实现进行提前兼容
     constructor(httpServerImpl: HttpServer, fileUrl: String) : this() {
-        this.httpSampleServer = httpServerImpl
+        this.httpSimpleServer = httpServerImpl
         createInstance(fileUrl)
     }
 
     //如果不实现客户端就将原声实现封装进来
-    constructor(fileUrl: String) : this() {
-        httpSampleServer = HttpServer.create()
-        createInstance(fileUrl)
+    constructor(path: String,port:Int) : this() {
+        httpSimpleServer = HttpServer.create(InetSocketAddress(port), 0)
+        createInstance(path)
     }
 
-    var fileUrl: String = "/appication"
-    fun createInstance(fileUrl: String) {
+    fun createInstance(path: String) {
         httpExchangeDispacher = HttpExchangeDispacher()
-        httpRespone = httpExchangeDispacher.httpRespone
-        httpResquest = httpExchangeDispacher.httpResquest
-        httpSampleServer.createContext(fileUrl, httpExchangeDispacher)
+        httpRespone = httpExchangeDispacher.httpResponse
+        httpResquest = httpExchangeDispacher.httpRequest
+        httpSimpleServer.createContext(path, httpExchangeDispacher)
         //需要处理异步 和多线程
-        httpSampleServer.executor = null
+        httpSimpleServer.executor = null
     }
 
 
     fun runServer() {
-        httpSampleServer.start()
+        httpSimpleServer.start()
     }
 }
